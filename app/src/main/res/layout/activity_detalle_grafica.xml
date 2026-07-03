@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/tvTituloDetalle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="DETALLE DE MOVIMIENTOS"
+        android:textColor="#FFFFFF"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="5dp"/>
+
+    <TextView
+        android:id="@+id/tvMontoMaximoDetalle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Monto máximo detectado: $0,00"
+        android:textColor="#8C8C8C"
+        android:textSize="14sp"
+        android:layout_marginBottom="25dp"/>
+
+    <com.example.wiltechfinance.PlanoCartesianoView
+        android:id="@+id/planoCartesianoDetalle"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#111111"/>
+
+    <Button
+        android:id="@+id/btnVolverGrafica"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="VOLVER AL MENÚ"
+        android:backgroundTint="#E50914"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="25dp"
+        android:textStyle="bold"/>
+
+</LinearLayout>

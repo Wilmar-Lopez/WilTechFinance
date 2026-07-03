@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="EDITAR PERFIL"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="25dp"/>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardFotoEditar"
+            android:layout_width="110dp"
+            android:layout_height="110dp"
+            app:cardCornerRadius="55dp"
+            app:cardBackgroundColor="#222222"
+            android:layout_marginBottom="5dp">
+
+            <ImageView
+                android:id="@+id/imgFotoContacto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@android:drawable/ic_menu_camera"
+                android:scaleType="centerCrop"
+                android:padding="30dp"
+                android:tint="#8C8C8C"
+                android:contentDescription="Foto de perfil" />
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cambiar foto de perfil"
+            android:textColor="#E50914"
+            android:textSize="14sp"
+            android:layout_marginBottom="25dp"/>
+
+        <EditText
+            android:id="@+id/etEditarNombre"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="#111111"
+            android:hint="Nombre completo"
+            android:textColorHint="#555555"
+            android:textColor="#FFFFFF"
+            android:paddingLeft="15dp"
+            android:text="Prueba Tech"
+            android:layout_marginBottom="12dp"
+            android:inputType="textPersonName"/>
+
+        <EditText
+            android:id="@+id/etEditarAlias"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="#111111"
+            android:hint="¿Cómo quieres que te llamemos?"
+            android:textColorHint="#555555"
+            android:textColor="#FFFFFF"
+            android:paddingLeft="15dp"
+            android:text="Prueba Tech"
+            android:layout_marginBottom="12dp"
+            android:inputType="text"/>
+
+        <EditText
+            android:id="@+id/etEditarCorreo"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="#111111"
+            android:hint="Correo electrónico"
+            android:textColorHint="#555555"
+            android:textColor="#FFFFFF"
+            android:paddingLeft="15dp"
+            android:text="prueba@tech.com"
+            android:layout_marginBottom="12dp"
+            android:inputType="textEmailAddress"/>
+
+        <EditText
+            android:id="@+id/etEditarTelefono"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="#111111"
+            android:hint="Número de teléfono"
+            android:textColorHint="#555555"
+            android:textColor="#FFFFFF"
+            android:paddingLeft="15dp"
+            android:text="3001234567"
+            android:layout_marginBottom="25dp"
+            android:inputType="phone"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Seguridad de la cuenta"
+            android:textColor="#8C8C8C"
+            android:textSize="14sp"
+            android:layout_gravity="start"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/etPasswordVieja"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="#111111"
+            android:hint="Contraseña actual (Requerida)"
+            android:textColorHint="#E50914"
+            android:textColor="#FFFFFF"
+            android:paddingLeft="15dp"
+            android:layout_marginBottom="12dp"
+            android:inputType="textPassword"/>
+
+        <EditText
+            android:id="@+id/etPasswordNueva"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="#111111"
+            android:hint="Nueva contraseña (Opcional)"
+            android:textColorHint="#555555"
+            android:textColor="#FFFFFF"
+            android:paddingLeft="15dp"
+            android:layout_marginBottom="30dp"
+            android:inputType="textPassword"/>
+
+        <Button
+            android:id="@+id/btnGuardarPerfil"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:text="GUARDAR CAMBIOS"
+            android:backgroundTint="#E50914"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:layout_marginBottom="10dp"/>
+
+        <Button
+            android:id="@+id/btnCancelarPerfil"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:text="CANCELAR"
+            android:backgroundTint="#333333"
+            android:textColor="#FFFFFF"/>
+
+    </LinearLayout>
+</ScrollView>
