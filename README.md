@@ -23,6 +23,22 @@ en qué se le va el dinero.
 ---
 <img width="475" height="714" alt="Captura de pantalla 2026-07-03 134838" src="https://github.com/user-attachments/assets/9a77ad7f-7219-459c-a093-81651114c146" />
 
+### Módulo 2: Nube y Autenticación
+
+3. Inicio de Sesión y Creación de Cuenta
+![Inicio de Sesión](Captura%20de%20pantalla%202026-08-19%20125819.png)
+![Registro](Captura%20de%20pantalla%202026-08-19%20125843.png)
+
+4. Ingreso de Credenciales y Validación por PIN
+![Credenciales](Captura%20de%20pantalla%202026-08-19%20130328.png)
+![PIN](Captura%20de%20pantalla%202026-08-19%20130343.png)
+
+5. Dashboard de Usuario Autenticado
+![Dashboard](Captura%20de%20pantalla%202026-08-19%20130212.png)
+
+6. Integración en Tiempo Real (App vs Firebase Firestore)
+![Firebase Integration](Captura%20de%20pantalla%202026-08-19%20130126.png)
+
 
 ## Características Clave del Proyecto
 
@@ -30,6 +46,9 @@ en qué se le va el dinero.
 * **Formulario Inteligente en Vivo:** Registro de movimientos (Ingresos y Gastos) con un formateador automático que añade los puntos de miles a medida que el usuario digita, adaptado al formato de moneda colombiano.
 * **Historial Cronológico Limpio:** Sección de movimientos que agrupa automáticamente las transacciones bajo etiquetas dinámicas ("HOY", "AYER" o fechas anteriores) para evitar el desorden visual.
 * **Plano Cartesiano Propio:** En lugar de usar librerías externas genéricas o pesadas, programé desde cero un componente visual personalizado (`PlanoCartesianoView`) que dibuja las gráficas de líneas y picos usando vectores nativos en tiempo real.
+* **Migración a la Nube (Módulo 2):** Transición a una arquitectura híbrida y escalable utilizando el ecosistema de Firebase.
+* **Firebase Authentication:** Sistema seguro de registro e inicio de sesión de usuarios.
+* **Cloud Firestore en Tiempo Real:** Persistencia de datos en la nube. Sincronización directa entre los registros de la App y la estructura de documentos en la consola de Firebase.
 
 ---
 
@@ -38,9 +57,10 @@ en qué se le va el dinero.
 * **Lenguaje de Programación:** Java nativo para Android.
 * **Base de Datos:** SQLite (`SQLiteOpenHelper`) con control de versiones estructurado.
 * **Diseño de Interfaz (UI/UX):** Componentes XML nativos, `ConstraintLayout`, `TextWatcher` en tiempo real y gráficos vectoriales mediante sobreescritura de canvas.
+* **Backend y Nube:** Firebase Authentication para gestión de usuarios y Cloud Firestore para base de datos NoSQL en tiempo real.
 
 ---
 
 ## Desarrollador:
-* **Wilmar López** - *Creador y Desarrollador Principal*
+* **Wilmar López** - *Creador,Tester y Desarrollador Principal*
 * **CESDE - Globant** -
