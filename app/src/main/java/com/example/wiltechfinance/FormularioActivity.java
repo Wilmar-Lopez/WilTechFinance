@@ -1,8 +1,5 @@
 package com.example.wiltechfinance;
 
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -13,10 +10,12 @@ import android.widget.RadioGroup;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.wiltechfinance.R;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 public class FormularioActivity extends AppCompatActivity {
@@ -24,23 +23,26 @@ public class FormularioActivity extends AppCompatActivity {
     private EditText etConcepto, etMonto;
     private RadioGroup rgTipo;
     private RadioButton rbIngreso;
-    private ConexionSQLite dbHelper;
+    private Button btnRegistrar;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_formulario);
 
-        dbHelper = new ConexionSQLite(this);
+        // Inicialización de Firestore Nube
+        db = FirebaseFirestore.getInstance();
+
         etConcepto = findViewById(R.id.etConcepto);
         etMonto = findViewById(R.id.etMonto);
         rgTipo = findViewById(R.id.rgTipo);
         rbIngreso = findViewById(R.id.rbIngreso);
 
-        Button btnRegistrar = findViewById(R.id.btnRegistrarActividad);
+        btnRegistrar = findViewById(R.id.btnRegistrarActividad);
         Button btnCancelar = findViewById(R.id.btnCancelarActividad);
 
-        // 🔥 ESCUCHADOR EN VIVO: Agrega los puntos de miles automáticamente en pantalla
+        // 🔥 ESCUCHADOR EN VIVO: Mantiene tus puntos de miles automáticamente
         etMonto.addTextChangedListener(new TextWatcher() {
             private String actual = "";
 
@@ -55,21 +57,19 @@ public class FormularioActivity extends AppCompatActivity {
                 if (!s.toString().equals(actual)) {
                     etMonto.removeTextChangedListener(this);
 
-                    // Limpia cualquier punto o coma previo para reformatear desde cero
                     String limpio = s.toString().replaceAll("[.,]", "");
 
                     if (!limpio.isEmpty()) {
                         try {
                             double numero = Double.parseDouble(limpio);
 
-                            // Configura el formato con punto (.) para separación de miles colombiano
                             DecimalFormatSymbols simbolos = new DecimalFormatSymbols(Locale.US);
                             simbolos.setGroupingSeparator('.');
                             DecimalFormat formateador = new DecimalFormat("#,###", simbolos);
 
                             actual = formateador.format(numero);
                             etMonto.setText(actual);
-                            etMonto.setSelection(actual.length()); // Mueve el cursor al final
+                            etMonto.setSelection(actual.length());
                         } catch (NumberFormatException e) {
                             // Ignora errores si la cifra es inválida
                         }
@@ -82,11 +82,11 @@ public class FormularioActivity extends AppCompatActivity {
             }
         });
 
-        btnRegistrar.setOnClickListener(v -> guardarEnBaseDeDatos());
+        btnRegistrar.setOnClickListener(v -> guardarEnFirestore());
         btnCancelar.setOnClickListener(v -> finish());
     }
 
-    private void guardarEnBaseDeDatos() {
+    private void guardarEnFirestore() {
         String concepto = etConcepto.getText().toString().trim();
         String montoStr = etMonto.getText().toString().trim();
 
@@ -95,41 +95,31 @@ public class FormularioActivity extends AppCompatActivity {
             return;
         }
 
-        // 🔥 MATEMÁTICA SEGURA: Quitamos los puntos visuales para que SQLite pueda operar el número real
+        // Limpieza de puntos para operar el número real
         String montoLimpio = montoStr.replaceAll("\\.", "");
         double montoIngresado = Double.parseDouble(montoLimpio);
         String tipo = rbIngreso.isChecked() ? "Ingreso" : "Gasto";
 
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        // Bloquea el botón mientras guarda para evitar duplicados
+        btnRegistrar.setEnabled(false);
 
-        // 1. Obtener saldo actual
-        Cursor cursor = db.rawQuery("SELECT saldo FROM usuarios WHERE credencial = 'Prueba@tech.com'", null);
-        double saldoActual = 0;
-        if (cursor.moveToFirst()) {
-            saldoActual = cursor.getDouble(0);
-        }
-        cursor.close();
+        // Obtenemos fecha actual
+        String fechaActual = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
-        // 2. Calcular nuevo saldo (Suma o Resta)
-        double nuevoSaldo = (tipo.equals("Ingreso")) ? saldoActual + montoIngresado : saldoActual - montoIngresado;
+        // Objeto Transaccion listo para Firestore
+        Transaccion transaccion = new Transaccion(concepto, montoIngresado, tipo, fechaActual);
 
-        // 3. Guardar el movimiento en la tabla de transacciones
-        ContentValues trans = new ContentValues();
-        trans.put("concepto", concepto);
-        trans.put("monto", montoIngresado);
-        trans.put("tipo", tipo);
-        // 🔥 FIJADO AQUÍ: Le obligamos a guardar la fecha real de la vida usando el método centralizado de tu Base de Datos
-        trans.put("fecha", ConexionSQLite.obtenerFechaActual());
-        db.insert("transacciones", null, trans);
-
-        // 4. Actualizar el saldo definitivo del usuario
-        ContentValues usu = new ContentValues();
-        usu.put("saldo", nuevoSaldo);
-        db.update("usuarios", usu, "credencial = 'Prueba@tech.com'", null);
-
-        Toast.makeText(this, "¡Movimiento guardado con éxito!", Toast.LENGTH_SHORT).show();
-
-        setResult(RESULT_OK); // Avisa al Home para refrescar las pantallas
-        finish();
+        // Guardar en la colección "transacciones" de la nube
+        db.collection("transacciones")
+                .add(transaccion)
+                .addOnSuccessListener(documentReference -> {
+                    Toast.makeText(this, "¡Movimiento guardado en Firestore!", Toast.LENGTH_SHORT).show();
+                    setResult(RESULT_OK);
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    btnRegistrar.setEnabled(true);
+                    Toast.makeText(this, "Error al conectar con la nube", Toast.LENGTH_SHORT).show();
+                });
     }
 }

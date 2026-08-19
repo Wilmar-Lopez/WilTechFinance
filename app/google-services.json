@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "180802749625",
+    "project_id": "wiltechfinance",
+    "storage_bucket": "wiltechfinance.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:180802749625:android:ab21fcc22b2d88a1298768",
+        "android_client_info": {
+          "package_name": "com.example.wiltechfinance"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBi5l8-qJdZt6gfGVN55fUPRi-cFE5QNuc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

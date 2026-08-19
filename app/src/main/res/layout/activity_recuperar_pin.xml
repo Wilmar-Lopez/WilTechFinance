@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
+    android:background="#141414"
     android:fillViewport="true">
 
     <LinearLayout
@@ -13,49 +13,56 @@
         android:padding="24dp">
 
         <TextView
-            android:id="@+id/tvTitulo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="60dp"
-            android:text="WilTech\nFinance"
-            android:textAlignment="center"
-            android:textColor="#E50914"
-            android:textSize="36sp"
+            android:layout_marginBottom="32dp"
+            android:text="Recuperar PIN"
+            android:textColor="#FFFFFF"
+            android:textSize="26sp"
             android:textStyle="bold" />
 
         <EditText
-            android:id="@+id/etCredencial"
+            android:id="@+id/etCorreoRecuperar"
             android:layout_width="match_parent"
-            android:layout_height="55dp"
+            android:layout_height="50dp"
             android:layout_marginBottom="16dp"
             android:background="#222222"
-            android:hint="Inicia tus credenciales"
+            android:hint="Ingresa credenciales"
             android:inputType="textEmailAddress"
-            android:padding="12dp"
+            android:paddingHorizontal="16dp"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#888888" />
+
+        <EditText
+            android:id="@+id/etNuevoPin"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginBottom="24dp"
+            android:background="#222222"
+            android:hint="Nuevo PIN de 4 dígitos"
+            android:inputType="numberPassword"
+            android:maxLength="4"
+            android:paddingHorizontal="16dp"
             android:textColor="#FFFFFF"
             android:textColorHint="#888888" />
 
         <Button
-            android:id="@+id/btnEntrar"
+            android:id="@+id/btnCambiarPin"
             android:layout_width="match_parent"
-            android:layout_height="55dp"
+            android:layout_height="50dp"
             android:layout_marginBottom="12dp"
             android:backgroundTint="#E50914"
-            android:text="ENTRAR"
+            android:text="ACTUALIZAR PIN"
             android:textColor="#FFFFFF"
-            android:textSize="16sp"
             android:textStyle="bold" />
 
         <Button
-            android:id="@+id/btnRegistrarse"
+            android:id="@+id/btnVolverLoginRecuperar"
             android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:layout_marginBottom="24dp"
+            android:layout_height="50dp"
             android:backgroundTint="#333333"
-            android:text="CREAR CUENTA"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+            android:text="VOLVER AL LOGIN"
+            android:textColor="#FFFFFF" />
 
     </LinearLayout>
 </ScrollView>

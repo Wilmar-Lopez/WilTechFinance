@@ -20,13 +20,13 @@ import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-// Fuerza el enlace con los IDs del layout
-import com.example.wiltechfinance.R;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class EditarPerfilActivity extends AppCompatActivity {
 
     private ImageView imgFotoContacto;
     private EditText etPasswordVieja;
+    private FirebaseFirestore db;
 
     private static final int REQ_COD_GALERIA = 101;
     private static final int REQ_COD_CAMARA = 102;
@@ -38,6 +38,8 @@ public class EditarPerfilActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editar_perfil);
 
+        db = FirebaseFirestore.getInstance();
+
         CardView cardFoto = findViewById(R.id.cardFotoEditar);
         imgFotoContacto = findViewById(R.id.imgFotoContacto);
         etPasswordVieja = findViewById(R.id.etPasswordVieja);
@@ -47,24 +49,35 @@ public class EditarPerfilActivity extends AppCompatActivity {
 
         cardFoto.setOnClickListener(v -> mostrarOpcionesImagen());
 
-        btnGuardar.setOnClickListener(v -> {
-            String passVieja = etPasswordVieja.getText().toString().trim();
-
-            if (passVieja.isEmpty()) {
-                Toast.makeText(this, "Por seguridad, debes ingresar tu contraseña actual", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if (!passVieja.equals("1234")) {
-                Toast.makeText(this, "Contraseña actual incorrecta. Inténtalo de nuevo.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            Toast.makeText(this, "¡Perfil actualizado con éxito!", Toast.LENGTH_SHORT).show();
-            finish();
-        });
+        btnGuardar.setOnClickListener(v -> validarYGuardarEnFirestore());
 
         btnCancelar.setOnClickListener(v -> finish());
+    }
+
+    private void validarYGuardarEnFirestore() {
+        String passVieja = etPasswordVieja.getText().toString().trim();
+
+        if (passVieja.isEmpty()) {
+            Toast.makeText(this, "Por seguridad, debes ingresar tu PIN/Contraseña actual", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Verificación de credencial contra Firestore
+        db.collection("usuarios").document("Prueba@tech.com")
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    String pinReal = documentSnapshot.exists() ? documentSnapshot.getString("pin") : "1234";
+
+                    if (pinReal != null && pinReal.equals(passVieja)) {
+                        Toast.makeText(this, "¡Perfil actualizado con éxito!", Toast.LENGTH_SHORT).show();
+                        finish();
+                    } else {
+                        Toast.makeText(this, "PIN/Contraseña actual incorrecta", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Error de conexión con la nube", Toast.LENGTH_SHORT).show()
+                );
     }
 
     private void mostrarOpcionesImagen() {
