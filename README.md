@@ -25,19 +25,20 @@ en qué se le va el dinero.
 
 ### Módulo 2: Nube y Autenticación
 
-3. Inicio de Sesión y Creación de Cuenta
-![Inicio de Sesión](Captura%20de%20pantalla%202026-08-19%20125819.png)
-![Registro](Captura%20de%20pantalla%202026-08-19%20125843.png)
+3. Creación de Cuenta e Integración en Tiempo Real (App vs Firebase Firestore)
+<img width="1365" height="767" alt="CrearCuenta" src="https://github.com/user-attachments/assets/97ca5983-30a6-4b2f-a87b-67832e089591" />
+
 
 4. Ingreso de Credenciales y Validación por PIN
-![Credenciales](Captura%20de%20pantalla%202026-08-19%20130328.png)
-![PIN](Captura%20de%20pantalla%202026-08-19%20130343.png)
+<img width="270" height="600" alt="Login" src="https://github.com/user-attachments/assets/39744227-b40c-4cb1-bf65-7763b814969d" />
+
+<br/>
+<img width="278" height="591" alt="pin" src="https://github.com/user-attachments/assets/816ffeab-fef3-4bf2-a9c4-9537c4541329" />
+
 
 5. Dashboard de Usuario Autenticado
-![Dashboard](Captura%20de%20pantalla%202026-08-19%20130212.png)
+<img width="280" height="592" alt="Dashboard" src="https://github.com/user-attachments/assets/382986fa-d130-46f8-8804-a78260bdf75c" />
 
-6. Integración en Tiempo Real (App vs Firebase Firestore)
-![Firebase Integration](Captura%20de%20pantalla%202026-08-19%20130126.png)
 
 
 ## Características Clave del Proyecto
