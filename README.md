@@ -49,12 +49,12 @@ La aplicación evolucionó para incorporar arquitectura en la nube, control de r
 Para probar el sistema de jerarquías (Modo Auditoría), por favor utilizar las siguientes cuentas de prueba:
 
 **Rol Administrador (Acceso total):**
-- **Correo:** [TU_CORREO_ADMIN_AQUI]
-- **Contraseña:** [TU_CLAVE_ADMIN_AQUI]
+- **Correo:** lopezwilmar3036@gmail.com
+- **Contraseña:** 20112003
 
 **Rol Estándar (Empleado/Usuario normal):**
-- **Correo:** [CORREO_USUARIO_NORMAL_AQUI]
-- **Contraseña:** [CLAVE_USUARIO_NORMAL_AQUI]
+- **Correo:** nicol.alba5@gmail.com
+- **Contraseña:** Nicol123
 
 --
 
