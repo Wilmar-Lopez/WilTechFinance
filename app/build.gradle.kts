@@ -38,9 +38,22 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.material)
 
-    // Firebase BoM y Firestore Nube
+    // Firebase BoM (Controla las versiones automáticamente)
     implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
+
+    // Servicios de Firebase exigidos por la rúbrica (Pilar A, B y D)
     implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-storage")
+    implementation("com.google.firebase:firebase-messaging")
+
+    // Google Maps SDK y GPS (Pilar C)
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("com.google.android.gms:play-services-location:21.1.0")
+
+    // Glide para cargar miniaturas de facturas (Pilar B)
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)

@@ -8,169 +8,261 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class EditarPerfilActivity extends AppCompatActivity {
 
     private ImageView imgFotoContacto;
-    private EditText etPasswordVieja;
-    private FirebaseFirestore db;
+    private EditText etEditarNombre, etEditarTelefono, etPasswordVieja, etPasswordNueva;
+    private EditText etEditarCorreo; // Para mostrar el correo real bloqueado si existe en el layout
+    private Button btnGuardar, btnCancelar;
 
-    private static final int REQ_COD_GALERIA = 101;
-    private static final int REQ_COD_CAMARA = 102;
-    private static final int PERMISO_GALERIA_CODE = 201;
-    private static final int PERMISO_CAMARA_CODE = 202;
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+    private StorageReference storageRef;
+
+    private Uri imagenSeleccionadaUri = null;
+    private byte[] imagenCapturadaBytes = null;
+    private String urlFotoActual = "";
+    private String documentIdUsuario = null;
+
+    private final ActivityResultLauncher<String[]> requestPermissionsLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+                if (Boolean.TRUE.equals(result.get(Manifest.permission.CAMERA))) {
+                    mostrarOpcionesImagen();
+                }
+            });
+
+    private final ActivityResultLauncher<Intent> galeriaLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    imagenSeleccionadaUri = result.getData().getData();
+                    imagenCapturadaBytes = null;
+                    Glide.with(this).load(imagenSeleccionadaUri).transform(new CircleCrop()).into(imgFotoContacto);
+                }
+            });
+
+    private final ActivityResultLauncher<Intent> camaraLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Bundle extras = result.getData().getExtras();
+                    Bitmap imageBitmap = (Bitmap) extras.get("data");
+                    Glide.with(this).load(imageBitmap).transform(new CircleCrop()).into(imgFotoContacto);
+
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                    imagenCapturadaBytes = baos.toByteArray();
+                    imagenSeleccionadaUri = null;
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editar_perfil);
 
+        mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+        storageRef = FirebaseStorage.getInstance().getReference("fotos_perfil");
 
         CardView cardFoto = findViewById(R.id.cardFotoEditar);
         imgFotoContacto = findViewById(R.id.imgFotoContacto);
+        etEditarNombre = findViewById(R.id.etEditarNombre);
+        etEditarTelefono = findViewById(R.id.etEditarTelefono);
         etPasswordVieja = findViewById(R.id.etPasswordVieja);
+        etPasswordNueva = findViewById(R.id.etPasswordNueva);
 
-        Button btnGuardar = findViewById(R.id.btnGuardarPerfil);
-        Button btnCancelar = findViewById(R.id.btnCancelarPerfil);
+        // Si tu layout tiene un campo para el correo, lo enlazamos y deshabilitamos
+        int idCorreo = getResources().getIdentifier("etEditarCorreo", "id", getPackageName());
+        if (idCorreo != 0) {
+            etEditarCorreo = findViewById(idCorreo);
+            if (etEditarCorreo != null) {
+                etEditarCorreo.setEnabled(false);
+                etEditarCorreo.setFocusable(false);
+            }
+        }
 
-        cardFoto.setOnClickListener(v -> mostrarOpcionesImagen());
+        btnGuardar = findViewById(R.id.btnGuardarPerfil);
+        btnCancelar = findViewById(R.id.btnCancelarPerfil);
 
-        btnGuardar.setOnClickListener(v -> validarYGuardarEnFirestore());
+        cargarDatosActuales();
 
+        cardFoto.setOnClickListener(v -> verificarPermisosYMostrarOpciones());
+        btnGuardar.setOnClickListener(v -> validarYReautenticar());
         btnCancelar.setOnClickListener(v -> finish());
     }
 
-    private void validarYGuardarEnFirestore() {
-        String passVieja = etPasswordVieja.getText().toString().trim();
+    private void cargarDatosActuales() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null || user.getEmail() == null) return;
 
-        if (passVieja.isEmpty()) {
-            Toast.makeText(this, "Por seguridad, debes ingresar tu PIN/Contraseña actual", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        String correoDoc = user.getEmail().toLowerCase().trim();
+        documentIdUsuario = correoDoc;
 
-        // Verificación de credencial contra Firestore
-        db.collection("usuarios").document("Prueba@tech.com")
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    String pinReal = documentSnapshot.exists() ? documentSnapshot.getString("pin") : "1234";
-
-                    if (pinReal != null && pinReal.equals(passVieja)) {
-                        Toast.makeText(this, "¡Perfil actualizado con éxito!", Toast.LENGTH_SHORT).show();
-                        finish();
+        // Cargar directamente con el ID estándar (correo electrónico en minúsculas)
+        db.collection("usuarios").document(correoDoc).get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        llenarCamposDesdeDoc(doc);
                     } else {
-                        Toast.makeText(this, "PIN/Contraseña actual incorrecta", Toast.LENGTH_SHORT).show();
+                        // Respaldo por si quedó con UID antiguo
+                        buscarPorUidRespaldo(user.getUid());
                     }
                 })
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, "Error de conexión con la nube", Toast.LENGTH_SHORT).show()
-                );
+                .addOnFailureListener(e -> buscarPorUidRespaldo(user.getUid()));
+    }
+
+    private void buscarPorUidRespaldo(String uid) {
+        db.collection("usuarios").whereEqualTo("uid", uid).limit(1).get()
+                .addOnSuccessListener(querySnapshots -> {
+                    if (!querySnapshots.isEmpty()) {
+                        DocumentSnapshot doc = querySnapshots.getDocuments().get(0);
+                        documentIdUsuario = doc.getId();
+                        llenarCamposDesdeDoc(doc);
+                    }
+                });
+    }
+
+    private void llenarCamposDesdeDoc(DocumentSnapshot doc) {
+        String nombre = doc.getString("nombre");
+        String telefono = doc.getString("telefono");
+        String correo = doc.getString("correo");
+        urlFotoActual = doc.getString("urlFoto");
+
+        if (nombre != null) etEditarNombre.setText(nombre);
+        if (telefono != null) etEditarTelefono.setText(telefono);
+        if (correo != null && etEditarCorreo != null) etEditarCorreo.setText(correo);
+
+        if (urlFotoActual != null && !urlFotoActual.isEmpty()) {
+            Glide.with(this).load(urlFotoActual).transform(new CircleCrop()).into(imgFotoContacto);
+        }
+    }
+
+    private void verificarPermisosYMostrarOpciones() {
+        String[] permisos = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) ?
+                new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_MEDIA_IMAGES} :
+                new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE};
+        requestPermissionsLauncher.launch(permisos);
     }
 
     private void mostrarOpcionesImagen() {
-        String[] opciones = {"Tomar foto con la cámara", "Agregar de la galería", "Eliminar foto actual"};
+        String[] opciones = {"Tomar foto", "Elegir de galería"};
+        new AlertDialog.Builder(this)
+                .setTitle("Cambiar Foto de Perfil")
+                .setItems(opciones, (dialog, which) -> {
+                    if (which == 0) {
+                        camaraLauncher.launch(new Intent(MediaStore.ACTION_IMAGE_CAPTURE));
+                    } else {
+                        galeriaLauncher.launch(new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI));
+                    }
+                }).show();
+    }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Selecciona una opción");
-        builder.setItems(opciones, (dialog, index) -> {
-            if (index == 0) {
-                verificarPermisosCamara();
-            } else if (index == 1) {
-                verificarPermisosGaleria();
-            } else if (index == 2) {
-                imgFotoContacto.setImageResource(android.R.drawable.ic_menu_camera);
-                imgFotoContacto.setPadding(30, 30, 30, 30);
-                imgFotoContacto.setImageTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#8C8C8C")));
-                Toast.makeText(this, "Foto eliminada", Toast.LENGTH_SHORT).show();
+    private void validarYReautenticar() {
+        String passVieja = etPasswordVieja.getText().toString().trim();
+        FirebaseUser user = mAuth.getCurrentUser();
+
+        if (passVieja.isEmpty() || user == null || user.getEmail() == null) {
+            Toast.makeText(this, "Ingresa tu contraseña actual por seguridad", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        btnGuardar.setEnabled(false);
+        btnGuardar.setText("VERIFICANDO...");
+
+        AuthCredential credential = EmailAuthProvider.getCredential(user.getEmail(), passVieja);
+        user.reauthenticate(credential).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                procesarActualizacion(user);
+            } else {
+                btnGuardar.setEnabled(true);
+                btnGuardar.setText("GUARDAR CAMBIOS");
+                Toast.makeText(this, "Contraseña actual incorrecta", Toast.LENGTH_SHORT).show();
             }
         });
-        builder.show();
     }
 
-    private void verificarPermisosCamara() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            abrirCamaraReal();
+    private void procesarActualizacion(FirebaseUser user) {
+        String nuevoPass = etPasswordNueva.getText().toString().trim();
+        if (!nuevoPass.isEmpty() && nuevoPass.length() >= 6) {
+            user.updatePassword(nuevoPass);
+        }
+
+        if (imagenCapturadaBytes != null || imagenSeleccionadaUri != null) {
+            subirNuevaFotoYGuardar();
         } else {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISO_CAMARA_CODE);
+            guardarDatosEnFirestore(urlFotoActual);
         }
     }
 
-    private void verificarPermisosGaleria() {
-        String permisoNecesario = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-                ? Manifest.permission.READ_MEDIA_IMAGES
-                : Manifest.permission.READ_EXTERNAL_STORAGE;
+    private void subirNuevaFotoYGuardar() {
+        String nombreArchivo = UUID.randomUUID().toString() + ".jpg";
+        StorageReference fotoRef = storageRef.child(nombreArchivo);
 
-        if (ContextCompat.checkSelfPermission(this, permisoNecesario) == PackageManager.PERMISSION_GRANTED) {
-            abrirGaleriaReal();
-        } else {
-            ActivityCompat.requestPermissions(this, new String[]{permisoNecesario}, PERMISO_GALERIA_CODE);
+        if (imagenCapturadaBytes != null) {
+            fotoRef.putBytes(imagenCapturadaBytes).addOnSuccessListener(task -> obtenerUrlYGuardar(fotoRef));
+        } else if (imagenSeleccionadaUri != null) {
+            fotoRef.putFile(imagenSeleccionadaUri).addOnSuccessListener(task -> obtenerUrlYGuardar(fotoRef));
         }
     }
 
-    private void abrirCamaraReal() {
-        Intent intentCamara = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (intentCamara.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(intentCamara, REQ_COD_CAMARA);
-        }
+    private void obtenerUrlYGuardar(StorageReference fotoRef) {
+        fotoRef.getDownloadUrl().addOnSuccessListener(uri -> guardarDatosEnFirestore(uri.toString()));
     }
 
-    private void abrirGaleriaReal() {
-        Intent intentGaleria = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(intentGaleria, REQ_COD_GALERIA);
-    }
+    private void guardarDatosEnFirestore(String urlFoto) {
+        String nombre = etEditarNombre.getText().toString().trim();
+        String telefono = etEditarTelefono.getText().toString().trim();
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == PERMISO_CAMARA_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                abrirCamaraReal();
-            } else {
-                Toast.makeText(this, "Permiso de cámara denegado.", Toast.LENGTH_SHORT).show();
-            }
-        } else if (requestCode == PERMISO_GALERIA_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                abrirGaleriaReal();
-            } else {
-                Toast.makeText(this, "Permiso de galería denegado.", Toast.LENGTH_SHORT).show();
-            }
+        Map<String, Object> actualizaciones = new HashMap<>();
+        actualizaciones.put("nombre", nombre);
+        actualizaciones.put("telefono", telefono);
+        if (urlFoto != null && !urlFoto.isEmpty()) {
+            actualizaciones.put("urlFoto", urlFoto);
         }
-    }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+        FirebaseUser user = mAuth.getCurrentUser();
+        String targetDoc = (documentIdUsuario != null) ? documentIdUsuario :
+                (user != null && user.getEmail() != null ? user.getEmail().toLowerCase().trim() : "desconocido");
 
-        if (resultCode == RESULT_OK && data != null) {
-            imgFotoContacto.setPadding(0, 0, 0, 0);
-            imgFotoContacto.setImageTintList(null);
-
-            if (requestCode == REQ_COD_GALERIA && data.getData() != null) {
-                Uri rutaImagen = data.getData();
-                imgFotoContacto.setImageURI(rutaImagen);
-                Toast.makeText(this, "Foto cargada desde galería", Toast.LENGTH_SHORT).show();
-
-            } else if (requestCode == REQ_COD_CAMARA) {
-                Bundle extras = data.getExtras();
-                if (extras != null) {
-                    Bitmap fotoCamara = (Bitmap) extras.get("data");
-                    imgFotoContacto.setImageBitmap(fotoCamara);
-                    Toast.makeText(this, "Foto capturada con éxito", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
+        db.collection("usuarios").document(targetDoc).set(actualizaciones, SetOptions.merge())
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "¡Perfil actualizado con éxito!", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .addOnFailureListener(err -> {
+                    btnGuardar.setEnabled(true);
+                    btnGuardar.setText("GUARDAR CAMBIOS");
+                    Toast.makeText(this, "Error al guardar: " + err.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 }

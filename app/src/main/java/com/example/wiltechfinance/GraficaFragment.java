@@ -9,6 +9,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -26,11 +28,16 @@ public class GraficaFragment extends Fragment {
     private NumberFormat formatoDinero;
     private FirebaseFirestore db;
     private ListenerRegistration firestoreListener;
+    private String correoAuditado = null;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View vista = inflater.inflate(R.layout.fragment_grafica, container, false);
+
+        if (getArguments() != null) {
+            correoAuditado = getArguments().getString("correoAuditado");
+        }
 
         db = FirebaseFirestore.getInstance();
         formatoDinero = NumberFormat.getCurrencyInstance(new Locale("es", "CO"));
@@ -44,10 +51,32 @@ public class GraficaFragment extends Fragment {
         return vista;
     }
 
+    private String obtenerCorreoObjetivo() {
+        if (correoAuditado != null && !correoAuditado.isEmpty()) {
+            return correoAuditado.toLowerCase().trim();
+        }
+        if (getActivity() instanceof HomeActivity) {
+            String correoHome = ((HomeActivity) getActivity()).getCorreoActivo();
+            if (correoHome != null && !correoHome.isEmpty()) {
+                return correoHome;
+            }
+        }
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        return (user != null && user.getEmail() != null) ? user.getEmail().toLowerCase().trim() : "";
+    }
+
     public void escucharFlujoCartesianoEnTiempoReal() {
         if (planoDiario == null || planoSemanal == null) return;
 
+        if (firestoreListener != null) {
+            firestoreListener.remove();
+        }
+
+        String correoObjetivo = obtenerCorreoObjetivo();
+        if (correoObjetivo.isEmpty()) return;
+
         firestoreListener = db.collection("transacciones")
+                .whereEqualTo("correoUsuario", correoObjetivo)
                 .orderBy("fecha", Query.Direction.ASCENDING)
                 .addSnapshotListener((snapshots, error) -> {
                     if (error != null || snapshots == null) return;

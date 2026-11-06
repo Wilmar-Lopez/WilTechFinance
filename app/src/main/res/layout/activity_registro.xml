@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#141414"
@@ -15,63 +16,189 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
+            android:layout_marginBottom="24dp"
             android:text="Crear Cuenta"
             android:textColor="#FFFFFF"
             android:textSize="26sp"
             android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/etNombreRegistro"
+        <!-- Nombre Completo -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilNombreRegistro"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:hint="Nombre Completo"
+            android:textColorHint="#CCCCCC"
+            app:boxStrokeColor="#E50914"
+            app:boxStrokeWidth="1.5dp"
+            app:boxStrokeWidthFocused="2dp"
+            app:hintTextColor="#E50914">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etNombreRegistro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:textColor="#FFFFFF" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Número de Celular -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilTelefonoRegistro"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:hint="Número de Celular (Para SMS)"
+            android:textColorHint="#CCCCCC"
+            app:boxStrokeColor="#E50914"
+            app:boxStrokeWidth="1.5dp"
+            app:boxStrokeWidthFocused="2dp"
+            app:hintTextColor="#E50914">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etTelefonoRegistro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="phone"
+                android:textColor="#FFFFFF" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Correo Electrónico -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilCorreoRegistro"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:hint="Correo Electrónico"
+            android:textColorHint="#CCCCCC"
+            app:boxStrokeColor="#E50914"
+            app:boxStrokeWidth="1.5dp"
+            app:boxStrokeWidthFocused="2dp"
+            app:hintTextColor="#E50914">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etCorreoRegistro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:textColor="#FFFFFF" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Contraseña -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilPasswordRegistro"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:background="#222222"
-            android:hint="Nombre completo"
-            android:inputType="textPersonName"
-            android:paddingHorizontal="16dp"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#888888" />
+            android:hint="Contraseña (Mín. 6 caracteres)"
+            android:textColorHint="#CCCCCC"
+            app:boxStrokeColor="#E50914"
+            app:boxStrokeWidth="1.5dp"
+            app:boxStrokeWidthFocused="2dp"
+            app:hintTextColor="#E50914"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="#FFFFFF">
 
-        <EditText
-            android:id="@+id/etCorreoRegistro"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPasswordRegistro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:textColor="#FFFFFF" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Selección de Método de Verificación -->
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp"
+            android:text="Selecciona método de verificación:"
+            android:textColor="#B3FFFFFF"
+            android:textSize="14sp" />
+
+        <RadioGroup
+            android:id="@+id/rgMetodoVerificacion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:background="#222222"
-            android:hint="Correo o Teléfono"
-            android:inputType="textEmailAddress"
-            android:paddingHorizontal="16dp"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#888888" />
+            android:orientation="horizontal">
 
-        <EditText
-            android:id="@+id/etPinRegistro"
+            <RadioButton
+                android:id="@+id/rbVerificarCorreo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:checked="true"
+                android:buttonTint="#E50914"
+                android:text="Por Gmail"
+                android:textColor="#FFFFFF" />
+
+            <RadioButton
+                android:id="@+id/rbVerificarSMS"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:buttonTint="#E50914"
+                android:text="Por SMS"
+                android:textColor="#FFFFFF" />
+        </RadioGroup>
+
+        <!-- Campo para ingresar el Código de Verificación SMS (visible solo al enviar código) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilCodigoSMS"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:hint="Código de Verificación (SMS)"
+            android:textColorHint="#CCCCCC"
+            android:visibility="gone"
+            app:boxStrokeColor="#E50914"
+            app:boxStrokeWidth="1.5dp"
+            app:boxStrokeWidthFocused="2dp"
+            app:hintTextColor="#E50914">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etCodigoSMS"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:textColor="#FFFFFF" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Botón para confirmar código o validar estado de Gmail -->
+        <Button
+            android:id="@+id/btnVerificarAcceso"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_marginBottom="24dp"
-            android:background="#222222"
-            android:hint="PIN de 4 dígitos"
-            android:inputType="numberPassword"
-            android:maxLength="4"
-            android:paddingHorizontal="16dp"
+            android:layout_marginBottom="12dp"
+            android:backgroundTint="#00C853"
+            android:text="VALIDAR VERIFICACIÓN"
             android:textColor="#FFFFFF"
-            android:textColorHint="#888888" />
+            android:textStyle="bold"
+            android:visibility="gone" />
 
+        <!-- Botón Principal Registrarse -->
         <Button
             android:id="@+id/btnRegistrarUsuario"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="55dp"
             android:layout_marginBottom="12dp"
             android:backgroundTint="#E50914"
             android:text="REGISTRARSE"
             android:textColor="#FFFFFF"
             android:textStyle="bold" />
 
+        <!-- Botón Volver al Login -->
         <Button
             android:id="@+id/btnVolverLogin"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="55dp"
             android:backgroundTint="#333333"
             android:text="VOLVER AL LOGIN"
             android:textColor="#FFFFFF" />
